@@ -1,7 +1,10 @@
+// RiskAnalytics.jsx
+
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
+
 import {
   FaUsers,
   FaCheckCircle,
@@ -9,11 +12,32 @@ import {
   FaChartPie
 } from "react-icons/fa";
 
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  PieChart,
+  Pie,
+  Cell,
+  Legend
+} from "recharts";
+
 function RiskAnalytics() {
   const [applications, setApplications] = useState([]);
+  const [open, setOpen] = useState(true);
 
   useEffect(() => {
     fetchData();
+
+    const interval = setInterval(() => {
+      fetchData();
+    }, 3000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const fetchData = async () => {
@@ -44,16 +68,6 @@ function RiskAnalytics() {
     (item) => item.probability >= 0.65
   ).length;
 
-  const lowRisk = applications.filter(
-    (item) => item.probability < 0.35
-  ).length;
-
-  const mediumRisk = applications.filter(
-    (item) =>
-      item.probability >= 0.35 &&
-      item.probability < 0.65
-  ).length;
-
   const approvalRate =
     total > 0
       ? ((approved / total) * 100).toFixed(1)
@@ -64,9 +78,41 @@ function RiskAnalytics() {
       ? ((rejected / total) * 100).toFixed(1)
       : 0;
 
+  // DAILY TREND CHART
+  const trendMap = {};
+
+  applications.forEach((item) => {
+    const date =
+      item.date?.split(",")[0] || "Today";
+
+    trendMap[date] = (trendMap[date] || 0) + 1;
+  });
+
+  const trendData = Object.keys(trendMap).map(
+    (key) => ({
+      date: key,
+      applications: trendMap[key]
+    })
+  );
+
+  // DONUT CHART
+  const donutData = [
+    {
+      name: "Approved",
+      value: approved
+    },
+    {
+      name: "Rejected",
+      value: rejected
+    }
+  ];
+
   return (
     <div style={styles.layout}>
-      <Sidebar />
+      <Sidebar
+        open={open}
+        setOpen={setOpen}
+      />
 
       <div style={styles.main}>
         <Navbar />
@@ -77,7 +123,7 @@ function RiskAnalytics() {
           </h1>
 
           <p style={styles.sub}>
-            Live MongoDB loan analytics dashboard
+            Live AI loan analytics dashboard
           </p>
 
           {/* TOP CARDS */}
@@ -93,7 +139,7 @@ function RiskAnalytics() {
               icon={<FaCheckCircle />}
               title="Approved"
               value={`${approvalRate}%`}
-              color="#10b981"
+              color="#16a34a"
             />
 
             <Card
@@ -113,87 +159,72 @@ function RiskAnalytics() {
 
           {/* CHARTS */}
           <div style={styles.grid2}>
-            {/* Risk Distribution */}
+            {/* LINE CHART */}
             <div style={styles.box}>
               <h3 style={styles.boxTitle}>
-                Risk Distribution
+                Daily Application Trend
               </h3>
 
-              <div style={styles.chartWrap}>
-                <div style={styles.yaxis}>
-                  <span>100%</span>
-                  <span>75%</span>
-                  <span>50%</span>
-                  <span>25%</span>
-                  <span>0%</span>
-                </div>
-
-                <div style={styles.bars}>
-                  <Bar
-                    h={`${(lowRisk /
-                      total) *
-                      100 || 0}%`}
-                    color="#10b981"
-                    label="Low"
-                    value={lowRisk}
+              <ResponsiveContainer
+                width="100%"
+                height={300}
+              >
+                <LineChart
+                  data={trendData}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
                   />
 
-                  <Bar
-                    h={`${(mediumRisk /
-                      total) *
-                      100 || 0}%`}
-                    color="#f59e0b"
-                    label="Medium"
-                    value={mediumRisk}
-                  />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip />
 
-                  <Bar
-                    h={`${(highRisk /
-                      total) *
-                      100 || 0}%`}
-                    color="#ef4444"
-                    label="High"
-                    value={highRisk}
+                  <Line
+                    type="monotone"
+                    dataKey="applications"
+                    stroke="#2563eb"
+                    strokeWidth={4}
+                    dot={{
+                      r: 5,
+                      fill: "#2563eb"
+                    }}
                   />
-                </div>
-              </div>
+                </LineChart>
+              </ResponsiveContainer>
             </div>
 
-            {/* Result Summary */}
+            {/* DONUT */}
             <div style={styles.box}>
               <h3 style={styles.boxTitle}>
-                Approval Summary
+                Approval Ratio
               </h3>
 
-              <div style={styles.chartWrap}>
-                <div style={styles.yaxis}>
-                  <span>100%</span>
-                  <span>75%</span>
-                  <span>50%</span>
-                  <span>25%</span>
-                  <span>0%</span>
-                </div>
+              <ResponsiveContainer
+                width="100%"
+                height={300}
+              >
+                <PieChart>
+                  <Pie
+                    data={donutData}
+                    dataKey="value"
+                    innerRadius={70}
+                    outerRadius={110}
+                    paddingAngle={5}
+                    label
+                  >
+                    <Cell fill="#16a34a" />
+                    <Cell fill="#ef4444" />
+                  </Pie>
 
-                <div style={styles.bars}>
-                  <Bar
-                    h={`${approvalRate}%`}
-                    color="#10b981"
-                    label="Approved"
-                    value={approved}
-                  />
-
-                  <Bar
-                    h={`${rejectRate}%`}
-                    color="#ef4444"
-                    label="Rejected"
-                    value={rejected}
-                  />
-                </div>
-              </div>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
             </div>
           </div>
 
-          {/* TABLE */}
+          {/* INSIGHTS */}
           <div style={styles.tableBox}>
             <h3 style={styles.boxTitle}>
               AI Insights
@@ -245,7 +276,7 @@ function Card({
     <div style={styles.card}>
       <div
         style={{
-          fontSize: 20,
+          fontSize: 22,
           color
         }}
       >
@@ -261,36 +292,11 @@ function Card({
       <div
         style={{
           height: 4,
-          background: color,
           marginTop: 10,
-          borderRadius: 10
+          borderRadius: 20,
+          background: color
         }}
       />
-    </div>
-  );
-}
-
-/* BAR */
-function Bar({
-  h,
-  color,
-  label,
-  value
-}) {
-  return (
-    <div style={styles.barItem}>
-      <div style={styles.barBg}>
-        <div
-          style={{
-            ...styles.barFill,
-            height: h,
-            background: color
-          }}
-        />
-      </div>
-
-      <small>{value}</small>
-      <span>{label}</span>
     </div>
   );
 }
@@ -299,7 +305,8 @@ const styles = {
   layout: {
     display: "flex",
     minHeight: "100vh",
-    background: "#f3f4f6"
+    background:
+      "linear-gradient(135deg,#0f172a,#1e3a8a)"
   },
 
   main: {
@@ -307,120 +314,82 @@ const styles = {
   },
 
   content: {
-    padding: 25
+    padding: "30px"
   },
 
   heading: {
-    fontSize: 30,
-    fontWeight: "700"
+    fontSize: "42px",
+    fontWeight: "800",
+    color: "white"
   },
 
   sub: {
-    color: "#6b7280",
-    marginBottom: 20
+    color:
+      "rgba(255,255,255,0.9)",
+    fontSize: "18px",
+    marginBottom: "24px"
   },
 
   grid4: {
     display: "grid",
     gridTemplateColumns:
-      "repeat(auto-fit,minmax(200px,1fr))",
-    gap: 16,
-    marginBottom: 20
+      "repeat(auto-fit,minmax(220px,1fr))",
+    gap: "18px",
+    marginBottom: "24px"
   },
 
   grid2: {
     display: "grid",
     gridTemplateColumns:
       "repeat(auto-fit,minmax(420px,1fr))",
-    gap: 16,
-    marginBottom: 20
+    gap: "20px",
+    marginBottom: "24px"
   },
 
   card: {
-    background: "#fff",
-    padding: 18,
-    borderRadius: 14,
+    background:
+      "rgba(255,255,255,0.95)",
+    padding: "22px",
+    borderRadius: "22px",
     boxShadow:
-      "0 4px 10px rgba(0,0,0,0.05)"
+      "0 12px 28px rgba(0,0,0,0.08)"
   },
 
   value: {
-    fontSize: 30,
-    margin: "10px 0"
+    fontSize: "34px",
+    margin: "10px 0",
+    fontWeight: "800"
   },
 
   box: {
-    background: "#fff",
-    padding: 20,
-    borderRadius: 14,
+    background:
+      "rgba(255,255,255,0.95)",
+    padding: "24px",
+    borderRadius: "24px",
     boxShadow:
-      "0 4px 10px rgba(0,0,0,0.05)"
+      "0 12px 28px rgba(0,0,0,0.08)"
   },
 
   boxTitle: {
-    marginBottom: 15
-  },
-
-  chartWrap: {
-    display: "flex",
-    gap: 12
-  },
-
-  yaxis: {
-    display: "flex",
-    flexDirection: "column",
-    justifyContent:
-      "space-between",
-    height: 220,
-    fontSize: 12,
-    color: "#6b7280"
-  },
-
-  bars: {
-    flex: 1,
-    display: "flex",
-    alignItems: "end",
-    justifyContent:
-      "space-around",
-    height: 220,
-    borderLeft:
-      "1px solid #d1d5db",
-    borderBottom:
-      "1px solid #d1d5db",
-    padding: "0 10px"
-  },
-
-  barItem: {
-    textAlign: "center",
-    width: 70
-  },
-
-  barBg: {
-    height: 180,
-    width: 40,
-    background: "#e5e7eb",
-    margin: "auto",
-    display: "flex",
-    alignItems: "end",
-    borderRadius: 8,
-    overflow: "hidden"
-  },
-
-  barFill: {
-    width: "100%"
+    fontSize: "28px",
+    fontWeight: "800",
+    marginBottom: "16px"
   },
 
   tableBox: {
-    background: "#fff",
-    padding: 20,
-    borderRadius: 14,
+    background:
+      "rgba(255,255,255,0.95)",
+    padding: "24px",
+    borderRadius: "24px",
     boxShadow:
-      "0 4px 10px rgba(0,0,0,0.05)"
+      "0 12px 28px rgba(0,0,0,0.08)"
   },
 
   table: {
     width: "100%",
-    borderCollapse: "collapse"
+    borderCollapse:
+      "collapse",
+    lineHeight: "2.4"
   }
 };
 
