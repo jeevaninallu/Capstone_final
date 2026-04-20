@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
+
 import {
   PieChart,
   Pie,
@@ -14,12 +15,12 @@ import {
   Bar,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Legend
+  CartesianGrid
 } from "recharts";
 
 function Dashboard() {
   const [applications, setApplications] = useState([]);
+  const [open, setOpen] = useState(true);
 
   useEffect(() => {
     fetchDashboard();
@@ -76,22 +77,42 @@ function Dashboard() {
   ).length;
 
   const pieData = [
-    { name: "Low Risk", value: lowRisk },
-    { name: "Medium Risk", value: mediumRisk },
-    { name: "High Risk", value: highRisk }
+    { name: "Low", value: lowRisk },
+    { name: "Medium", value: mediumRisk },
+    { name: "High", value: highRisk }
   ];
 
-  const barData = [
-    {
-      name: "Loans",
-      Approved: approved,
-      Rejected: rejected
-    }
+  const poor = applications.filter(
+    (item) => item.formData?.cibil_score < 550
+  ).length;
+
+  const average = applications.filter(
+    (item) =>
+      item.formData?.cibil_score >= 550 &&
+      item.formData?.cibil_score < 700
+  ).length;
+
+  const good = applications.filter(
+    (item) =>
+      item.formData?.cibil_score >= 700 &&
+      item.formData?.cibil_score < 800
+  ).length;
+
+  const excellent = applications.filter(
+    (item) =>
+      item.formData?.cibil_score >= 800
+  ).length;
+
+  const cibilData = [
+    { name: "Poor", value: poor },
+    { name: "Average", value: average },
+    { name: "Good", value: good },
+    { name: "Excellent", value: excellent }
   ];
 
   return (
     <div style={styles.layout}>
-      <Sidebar />
+      <Sidebar open={open} setOpen={setOpen} />
 
       <div style={styles.main}>
         <Navbar />
@@ -105,28 +126,28 @@ function Dashboard() {
             Real-time loan monitoring system
           </p>
 
-          {/* Top Cards */}
+          {/* Cards */}
           <div style={styles.cards}>
             <Card
               title="Total Applications"
               value={total}
-              color="#2563eb"
+              color="#3b82f6"
             />
 
             <Card
               title="Approved Loans"
               value={approved}
-              color="#16a34a"
+              color="#22c55e"
             />
 
             <Card
               title="Rejected Loans"
               value={rejected}
-              color="#dc2626"
+              color="#ef4444"
             />
           </div>
 
-          {/* Graph Section */}
+          {/* Charts */}
           <div style={styles.grid}>
             {/* Pie */}
             <div style={styles.chartCard}>
@@ -136,16 +157,16 @@ function Dashboard() {
 
               <ResponsiveContainer
                 width="100%"
-                height={320}
+                height={300}
               >
                 <PieChart>
                   <Pie
                     data={pieData}
                     dataKey="value"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={100}
+                    outerRadius={115}
                     label
+                    isAnimationActive
+                    animationDuration={1500}
                   >
                     <Cell fill="#22c55e" />
                     <Cell fill="#f59e0b" />
@@ -160,116 +181,113 @@ function Dashboard() {
             {/* Bar */}
             <div style={styles.chartCard}>
               <h2 style={styles.chartTitle}>
-                Approval Analysis
+                CIBIL Score Analysis
               </h2>
 
               <ResponsiveContainer
                 width="100%"
-                height={320}
+                height={300}
               >
-                <BarChart data={barData}>
+                <BarChart data={cibilData}>
                   <CartesianGrid strokeDasharray="3 3" />
-
                   <XAxis dataKey="name" />
                   <YAxis />
-
                   <Tooltip />
-                  <Legend />
 
                   <Bar
-                    dataKey="Approved"
-                    fill="#16a34a"
-                  />
-
-                  <Bar
-                    dataKey="Rejected"
-                    fill="#dc2626"
+                    dataKey="value"
+                    fill="#2563eb"
+                    radius={[8, 8, 0, 0]}
+                    barSize={55}
+                    isAnimationActive
+                    animationDuration={1600}
                   />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
 
-          {/* Recent 10 Applications */}
+          {/* Table */}
           <div style={styles.tableCard}>
             <h2 style={styles.chartTitle}>
-              Recent 10 Applications
+              Recent Applications
             </h2>
 
-            <table style={styles.table}>
-              <thead>
-                <tr>
-                  <th style={styles.th}>ID</th>
-                  <th style={styles.th}>Date</th>
-                  <th style={styles.th}>Income</th>
-                  <th style={styles.th}>Loan</th>
-                  <th style={styles.th}>CIBIL</th>
-                  <th style={styles.th}>Status</th>
-                  <th style={styles.th}>Risk</th>
-                </tr>
-              </thead>
+            <div style={styles.tableWrapper}>
+              <table style={styles.table}>
+                <thead>
+                  <tr>
+                    <th style={styles.th}>ID</th>
+                    <th style={styles.th}>Date</th>
+                    <th style={styles.th}>Income</th>
+                    <th style={styles.th}>Loan</th>
+                    <th style={styles.th}>CIBIL</th>
+                    <th style={styles.th}>Status</th>
+                  </tr>
+                </thead>
 
-              <tbody>
-                {applications
-                  .slice(0, 10)
-                  .map((item) => (
-                    <tr key={item._id}>
-                      <td style={styles.td}>
-                        {item.applicationId}
-                      </td>
-
-                      <td style={styles.td}>
-                        {item.date}
-                      </td>
-
-                      <td style={styles.td}>
-                        ₹
-                        {
-                          item.formData
-                            ?.income_annum
+                <tbody>
+                  {applications
+                    .slice(0, 10)
+                    .map((item) => (
+                      <tr
+                        key={item._id}
+                        style={styles.row}
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.background =
+                            "#f8fafc")
                         }
-                      </td>
-
-                      <td style={styles.td}>
-                        ₹
-                        {
-                          item.formData
-                            ?.loan_amount
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.background =
+                            "white")
                         }
-                      </td>
-
-                      <td style={styles.td}>
-                        {
-                          item.formData
-                            ?.cibil_score
-                        }
-                      </td>
-
-                      <td
-                        style={{
-                          ...styles.td,
-                          color:
-                            item.prediction ===
-                            "Approved"
-                              ? "green"
-                              : "red",
-                          fontWeight: "700"
-                        }}
                       >
-                        {item.prediction}
-                      </td>
+                        <td style={styles.td}>
+                          {item.applicationId}
+                        </td>
 
-                      <td style={styles.td}>
-                        {(
-                          item.probability *
-                          100
-                        ).toFixed(2)}
-                        %
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
+                        <td style={styles.td}>
+                          {item.date}
+                        </td>
+
+                        <td style={styles.td}>
+                          ₹
+                          {Number(
+                            item.formData?.income_annum
+                          ).toLocaleString("en-IN")}
+                        </td>
+
+                        <td style={styles.td}>
+                          ₹
+                          {Number(
+                            item.formData?.loan_amount
+                          ).toLocaleString("en-IN")}
+                        </td>
+
+                        <td style={styles.td}>
+                          {
+                            item.formData?.cibil_score
+                          }
+                        </td>
+
+                        <td
+                          style={{
+                            ...styles.td,
+                            fontWeight: "700",
+                            color:
+                              item.prediction ===
+                              "Approved"
+                                ? "#16a34a"
+                                : "#dc2626"
+                          }}
+                        >
+                          {item.prediction}
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -283,13 +301,27 @@ function Card({
   color
 }) {
   return (
-    <div style={styles.card}>
-      <h3>{title}</h3>
+    <div
+      style={styles.card}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform =
+          "translateY(-4px)";
+        e.currentTarget.style.boxShadow =
+          "0 14px 30px rgba(0,0,0,0.18)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform =
+          "translateY(0px)";
+        e.currentTarget.style.boxShadow =
+          "0 10px 20px rgba(0,0,0,0.15)";
+      }}
+    >
+      <p style={styles.cardTitle}>{title}</p>
 
       <h1
         style={{
-          color: color,
-          marginTop: "12px"
+          ...styles.cardValue,
+          color
         }}
       >
         {value}
@@ -302,7 +334,8 @@ const styles = {
   layout: {
     display: "flex",
     minHeight: "100vh",
-    background: "#f3f4f6"
+    background:
+      "linear-gradient(135deg,#0f172a,#1e3a8a)"
   },
 
   main: {
@@ -310,17 +343,18 @@ const styles = {
   },
 
   content: {
-    padding: "30px"
+    padding: "22px 30px"
   },
 
   heading: {
-    fontSize: "36px",
-    fontWeight: "700"
+    fontSize: "38px",
+    fontWeight: "800",
+    color: "white"
   },
 
   sub: {
-    color: "#6b7280",
-    marginBottom: "25px"
+    color: "rgba(255,255,255,0.75)",
+    marginBottom: "24px"
   },
 
   cards: {
@@ -328,15 +362,29 @@ const styles = {
     gridTemplateColumns:
       "repeat(3,1fr)",
     gap: "20px",
-    marginBottom: "30px"
+    marginBottom: "28px"
   },
 
   card: {
-    background: "white",
+    background:
+      "rgba(255,255,255,0.08)",
     padding: "24px",
-    borderRadius: "16px",
+    borderRadius: "18px",
+    color: "white",
+    transition: "0.3s",
+    cursor: "pointer",
     boxShadow:
-      "0 2px 8px rgba(0,0,0,0.05)"
+      "0 10px 20px rgba(0,0,0,0.15)"
+  },
+
+  cardTitle: {
+    fontSize: "16px"
+  },
+
+  cardValue: {
+    fontSize: "34px",
+    fontWeight: "800",
+    marginTop: "10px"
   },
 
   grid: {
@@ -344,49 +392,56 @@ const styles = {
     gridTemplateColumns:
       "1fr 1fr",
     gap: "25px",
-    marginBottom: "30px"
+    marginBottom: "28px"
   },
 
   chartCard: {
-    background: "white",
-    padding: "25px",
-    borderRadius: "16px",
+    background: "#f8fbff",
+    padding: "22px",
+    borderRadius: "22px",
     boxShadow:
-      "0 2px 8px rgba(0,0,0,0.05)"
+      "0 10px 25px rgba(0,0,0,0.10)"
   },
 
   chartTitle: {
-    marginBottom: "20px",
     fontSize: "24px",
-    fontWeight: "700"
+    fontWeight: "800",
+    marginBottom: "10px"
   },
 
   tableCard: {
     background: "white",
     padding: "25px",
-    borderRadius: "16px",
+    borderRadius: "22px",
     boxShadow:
-      "0 2px 8px rgba(0,0,0,0.05)"
+      "0 10px 25px rgba(0,0,0,0.10)"
+  },
+
+  tableWrapper: {
+    overflowX: "auto"
   },
 
   table: {
     width: "100%",
     borderCollapse:
-      "collapse",
-    textAlign: "left"
+      "collapse"
   },
 
   th: {
     padding: "14px",
-    background: "#f9fafb",
-    borderBottom:
-      "1px solid #e5e7eb"
+    background: "#eff6ff",
+    color: "#1e3a8a",
+    textAlign: "left"
   },
 
   td: {
     padding: "14px",
     borderBottom:
-      "1px solid #f3f4f6"
+      "1px solid #f1f5f9"
+  },
+
+  row: {
+    transition: "0.3s"
   }
 };
 

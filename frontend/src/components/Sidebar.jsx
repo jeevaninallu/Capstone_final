@@ -1,18 +1,78 @@
-import { NavLink } from "react-router-dom";
+// Sidebar.jsx
 
-function Sidebar() {
+import { NavLink } from "react-router-dom";
+import {
+  LayoutDashboard,
+  FilePlus2,
+  History,
+  ShieldAlert,
+  BrainCircuit,
+  Settings,
+  ChevronLeft,
+  ChevronRight
+} from "lucide-react";
+
+function Sidebar({ open, setOpen }) {
   const menu = [
-    { name: "Dashboard", path: "/dashboard" },
-    { name: "New Risk Assessment", path: "/assessment" },
-    { name: "Applicant History", path: "/history" },
-    { name: "Risk Analytics", path: "/analytics" },
-    { name: "Model Insights", path: "/insights" },
-    { name: "Settings", path: "/settings" }
+    {
+      name: "Dashboard",
+      path: "/dashboard",
+      icon: <LayoutDashboard size={18} />
+    },
+    {
+      name: "New Risk Assessment",
+      path: "/assessment",
+      icon: <FilePlus2 size={18} />
+    },
+    {
+      name: "Applicant History",
+      path: "/history",
+      icon: <History size={18} />
+    },
+    {
+      name: "Risk Analytics",
+      path: "/analytics",
+      icon: <ShieldAlert size={18} />
+    },
+    {
+      name: "Model Insights",
+      path: "/insights",
+      icon: <BrainCircuit size={18} />
+    },
+    {
+      name: "Settings",
+      path: "/settings",
+      icon: <Settings size={18} />
+    }
   ];
 
   return (
-    <div style={styles.sidebar}>
-      <h2 style={styles.logo}>Loan Default</h2>
+    <div
+      style={{
+        ...styles.sidebar,
+        width: open ? "260px" : "85px"
+      }}
+    >
+      <div style={styles.top}>
+        {open && (
+          <h2 style={styles.logo}>
+            Loan Default
+          </h2>
+        )}
+
+        <button
+          style={styles.toggleBtn}
+          onClick={() =>
+            setOpen(!open)
+          }
+        >
+          {open ? (
+            <ChevronLeft size={18} />
+          ) : (
+            <ChevronRight size={18} />
+          )}
+        </button>
+      </div>
 
       {menu.map((item, index) => (
         <NavLink
@@ -20,11 +80,24 @@ function Sidebar() {
           to={item.path}
           style={({ isActive }) => ({
             ...styles.link,
-            background: isActive ? "#dbeafe" : "transparent",
-            color: isActive ? "#1d4ed8" : "#111827"
+            justifyContent: open
+              ? "flex-start"
+              : "center",
+            background: isActive
+              ? "#dbeafe"
+              : "transparent",
+            color: isActive
+              ? "#2563eb"
+              : "#111827"
           })}
         >
-          {item.name}
+          {item.icon}
+
+          {open && (
+            <span>
+              {item.name}
+            </span>
+          )}
         </NavLink>
       ))}
     </div>
@@ -33,26 +106,46 @@ function Sidebar() {
 
 const styles = {
   sidebar: {
-    width: "260px",
     minHeight: "100vh",
     background: "white",
-    borderRight: "1px solid #e5e7eb",
+    borderRight:
+      "1px solid #e5e7eb",
     padding: "20px",
-    boxSizing: "border-box"
+    boxSizing: "border-box",
+    transition: "0.3s"
+  },
+
+  top: {
+    display: "flex",
+    justifyContent:
+      "space-between",
+    alignItems: "center",
+    marginBottom: "25px"
   },
 
   logo: {
-    marginBottom: "25px",
-    color: "#1e3a8a"
+    color: "#1e3a8a",
+    fontSize: "24px"
+  },
+
+  toggleBtn: {
+    border: "none",
+    background: "#eff6ff",
+    padding: "8px",
+    borderRadius: "8px",
+    cursor: "pointer"
   },
 
   link: {
-    display: "block",
-    padding: "12px",
+    display: "flex",
+    gap: "12px",
+    alignItems: "center",
+    padding: "13px",
     marginBottom: "10px",
-    borderRadius: "10px",
+    borderRadius: "12px",
     textDecoration: "none",
-    fontWeight: "600"
+    fontWeight: "600",
+    transition: "0.3s"
   }
 };
 
