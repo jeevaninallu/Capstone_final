@@ -6,7 +6,6 @@ import RiskAssessment from "./pages/RiskAssessment";
 import ApplicantHistory from "./pages/ApplicantHistory";
 import RiskAnalytics from "./pages/RiskAnalytics";
 import ModelInsights from "./pages/ModelInsights";
-import Settings from "./pages/Settings";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -65,14 +64,7 @@ function AppRoutes() {
         }
       />
 
-      <Route
-        path="/settings"
-        element={
-          <ProtectedRoute>
-            <Settings />
-          </ProtectedRoute>
-        }
-      />
+
     </Routes>
   );
 }
