@@ -1,7 +1,7 @@
 // RiskAnalytics.jsx
 
 import { useEffect, useState } from "react";
-import axios from "axios";
+import API from "../services/api";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 
@@ -42,8 +42,8 @@ function RiskAnalytics() {
 
   const fetchData = async () => {
     try {
-      const res = await axios.get(
-        "http://localhost:5000/api/dashboard"
+      const res = await API.get(
+        "/dashboard"
       );
 
       if (res.data.success) {

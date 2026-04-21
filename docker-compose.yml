@@ -1,0 +1,18 @@
+services:
+
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URI=mongodb://host.docker.internal:27017/loan_db
+
+  ml_service:
+    build: ./ml_service
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
