@@ -1,7 +1,7 @@
 // RiskAssessment.jsx
 
 import { useState } from "react";
-import axios from "axios";
+import API from "../services/api";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 
@@ -39,8 +39,8 @@ function RiskAssessment() {
     setResult(null);
 
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/predict",
+      const response = await API.post(
+        "/predict",
         formData
       );
 

@@ -1,7 +1,7 @@
 // ApplicantHistory.jsx
 
 import { useEffect, useState } from "react";
-import axios from "axios";
+import API from "../services/api";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 
@@ -22,8 +22,8 @@ function ApplicantHistory() {
 
   const fetchHistory = async () => {
     try {
-      const res = await axios.get(
-        "http://localhost:5000/api/dashboard"
+      const res = await API.get(
+        "/dashboard"
       );
 
       if (res.data.success) {
@@ -43,8 +43,8 @@ function ApplicantHistory() {
 
   const deleteRecord = async (id) => {
     try {
-      await axios.delete(
-        `http://localhost:5000/api/dashboard/${id}`
+      await API.delete(
+        `/dashboard/${id}`
       );
 
       fetchHistory();
