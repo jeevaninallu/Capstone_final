@@ -1,3 +1,4 @@
+# backend/Dockerfile
 FROM node:18
 
 WORKDIR /app
@@ -7,6 +8,6 @@ RUN npm install
 
 COPY . .
 
-EXPOSE 5000
+EXPOSE 5001
 
 CMD ["node", "server.js"]

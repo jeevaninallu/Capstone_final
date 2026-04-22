@@ -5,18 +5,20 @@ require("dotenv").config();
 
 const app = express();
 
-// Middleware
+// ================= MIDDLEWARE =================
 app.use(cors());
 app.use(express.json());
 
-// MongoDB Connect
+// ================= DATABASE =================
 mongoose.connect(process.env.MONGO_URI)
-.then(() => console.log("MongoDB Connected"))
-.catch((err) => console.log(err));
+  .then(() => console.log("MongoDB Connected"))
+  .catch((err) => console.log(err));
+
+// ================= ROUTES =================
 
 // Test Route
 app.get("/", (req, res) => {
-  res.send("Backend + MongoDB Running");
+  res.send("Backend + MongoDB Running (HTTP inside Docker)");
 });
 
 app.get("/api/test", (req, res) => {
@@ -26,19 +28,19 @@ app.get("/api/test", (req, res) => {
   });
 });
 
-// Start Server
-const PORT = process.env.PORT || 5000;
-
+// Import Routes
 const predictionRoutes = require("./routes/predictionRoutes");
-
 app.use("/api", predictionRoutes);
 
 const dashboardRoutes = require("./routes/dashboardRoutes");
-
 app.use("/api/dashboard", dashboardRoutes);
 
 app.use("/api/auth", require("./routes/authRoutes"));
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// ================= SERVER =================
+const PORT = 5001;
+
+// IMPORTANT: 0.0.0.0 for Docker
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`HTTP Server running on port ${PORT}`);
 });
