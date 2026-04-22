@@ -7,7 +7,7 @@ exports.predictLoan = async (req, res) => {
 
     // Send to Flask ML API
     const response = await axios.post(
-      "http://127.0.0.1:5001/predict",
+      "http://ml_service:8000/predict",
       formData
     );
 

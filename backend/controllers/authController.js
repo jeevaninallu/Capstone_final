@@ -8,43 +8,38 @@ const LoginLog = require("../models/LoginLog");
 // ===============================
 exports.registerUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    let { name, email, password } = req.body;
 
-    const existingUser =
-      await User.findOne({ email });
+    // 🔥 Normalize email
+    email = email.trim().toLowerCase();
+
+    const existingUser = await User.findOne({ email });
 
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        message:
-          "Email already registered"
+        message: "Email already registered"
       });
     }
 
-    const hashedPassword =
-      await bcrypt.hash(
-        password,
-        10
-      );
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     await User.create({
       name,
       email,
-      password:
-        hashedPassword
+      password: hashedPassword
     });
 
     res.status(201).json({
       success: true,
-      message:
-        "Registration successful"
+      message: "Registration successful"
     });
 
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       success: false,
-      message:
-        error.message
+      message: error.message
     });
   }
 };
@@ -55,13 +50,17 @@ exports.registerUser = async (req, res) => {
 // ===============================
 exports.loginUser = async (req, res) => {
   try {
-    const { email, password } =
-      req.body;
+    let { email, password } = req.body;
 
-    const user =
-      await User.findOne({
-        email
-      });
+    // 🔥 Normalize email
+    email = email.trim().toLowerCase();
+
+    console.log("Login attempt:", email);
+
+    const user = await User.findOne({ email });
+
+    // Debug: check DB content
+    console.log("All users in DB:", await User.find());
 
     // Email not found
     if (!user) {
@@ -72,47 +71,32 @@ exports.loginUser = async (req, res) => {
 
       return res.status(400).json({
         success: false,
-        message:
-          "Email not found"
+        message: "Email not found"
       });
     }
 
+    console.log("User found:", user.email);
+
     // Account locked
-    if (
-      user.lockUntil &&
-      user.lockUntil > Date.now()
-    ) {
+    if (user.lockUntil && user.lockUntil > Date.now()) {
       return res.status(400).json({
         success: false,
-        message:
-          "Account locked for 15 minutes"
+        message: "Account locked for 15 minutes"
       });
     }
 
     // Password check
-    const match =
-      await bcrypt.compare(
-        password,
-        user.password
-      );
+    const match = await bcrypt.compare(password, user.password);
 
     // Wrong password
     if (!match) {
       user.loginAttempts += 1;
 
-      const attemptsLeft =
-        3 - user.loginAttempts;
+      const attemptsLeft = 3 - user.loginAttempts;
 
       // Lock after 3 attempts
-      if (
-        user.loginAttempts >= 3
-      ) {
-        user.lockUntil =
-          Date.now() +
-          15 *
-            60 *
-            1000;
-
+      if (user.loginAttempts >= 3) {
+        user.lockUntil = Date.now() + 15 * 60 * 1000;
         user.loginAttempts = 0;
 
         await user.save();
@@ -124,8 +108,7 @@ exports.loginUser = async (req, res) => {
 
         return res.status(400).json({
           success: false,
-          message:
-            "Account locked for 15 minutes"
+          message: "Account locked for 15 minutes"
         });
       }
 
@@ -138,12 +121,11 @@ exports.loginUser = async (req, res) => {
 
       return res.status(400).json({
         success: false,
-        message:
-          `Wrong credentials. ${attemptsLeft} attempts left`
+        message: `Wrong credentials. ${attemptsLeft} attempts left`
       });
     }
 
-    // Successful login
+    // ✅ Successful login
     user.loginAttempts = 0;
     user.lockUntil = null;
 
@@ -156,8 +138,7 @@ exports.loginUser = async (req, res) => {
 
     res.json({
       success: true,
-      message:
-        "Login successful",
+      message: "Login successful",
       user: {
         name: user.name,
         email: user.email
@@ -165,10 +146,10 @@ exports.loginUser = async (req, res) => {
     });
 
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       success: false,
-      message:
-        error.message
+      message: error.message
     });
   }
 };
