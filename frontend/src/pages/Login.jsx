@@ -194,7 +194,7 @@ function Login() {
               styles.loginSub
             }
           >
-            Access your banking dashboard aa
+            Access your banking dashboard
           </p>
 
           {errorMsg && (
