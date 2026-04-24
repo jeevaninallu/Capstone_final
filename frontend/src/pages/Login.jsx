@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../services/api";
 import { useAuth } from "../context/AuthContext";
@@ -8,20 +8,20 @@ import {
   signInWithPopup
 } from "firebase/auth";
 
-// ✅ ONLY CHANGE THESE IMPORTS AT TOP
-
 import { FcGoogle } from "react-icons/fc";
 
 import {
   Mail,
   Lock,
   Eye,
+  EyeOff,
   ShieldCheck,
   Briefcase,
   FileCheck,
   Users,
   Landmark,
-  ClipboardCheck
+  ClipboardCheck,
+  Loader2
 } from "lucide-react";
 
 function Login() {
@@ -34,10 +34,26 @@ function Login() {
   });
 
   const [errorMsg, setErrorMsg] = useState("");
-  const [showPassword, setShowPassword] =
-    useState(false);
-  const [loading, setLoading] =
-    useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [remember, setRemember] = useState(false);
+  const [isMobile, setIsMobile] = useState(
+    window.innerWidth < 900
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 900);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () =>
+      window.removeEventListener(
+        "resize",
+        handleResize
+      );
+  }, []);
 
   const handleChange = (e) => {
     setForm({
@@ -51,6 +67,14 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!form.email || !form.password) {
+      setErrorMsg(
+        "Please fill all fields"
+      );
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -61,6 +85,14 @@ function Login() {
 
       if (res.data.success) {
         login(res.data.user);
+
+        if (remember) {
+          localStorage.setItem(
+            "savedEmail",
+            form.email
+          );
+        }
+
         navigate("/dashboard");
       }
     } catch (error) {
@@ -104,98 +136,99 @@ function Login() {
     };
 
   return (
-    <div style={styles.page}>
+    <div
+      style={{
+        ...styles.page,
+        gridTemplateColumns:
+          isMobile
+            ? "1fr"
+            : "1fr 1fr"
+      }}
+    >
       {/* LEFT */}
-      <div style={styles.left}>
-        <div>
-          <div style={styles.logo}>
-            <ShieldCheck
-              color="white"
-              size={28}
-            />
-          </div>
+      {!isMobile && (
+        <div style={styles.left}>
+          <div>
+            <div style={styles.logo}>
+              <ShieldCheck
+                color="white"
+                size={30}
+              />
+            </div>
 
-          <h1 style={styles.brandTitle}>
-            Loan Default Prediction
-          </h1>
+            <h1 style={styles.brandTitle}>
+              Loan Default Prediction
+            </h1>
 
-          <p style={styles.brandSub}>
-            Smart internal banking
-            system for secure loan
-            approvals and risk review.
-          </p>
+            <p style={styles.brandSub}>
+              AI-powered internal
+              banking platform for
+              secure approvals,
+              default risk review,
+              and officer workflow.
+            </p>
 
-          {/* NEW 5 BOXES */}
-          <div style={styles.featureBox}>
-            <Feature
-              icon={
-                <Briefcase
-                  size={18}
-                />
-              }
-              text="Bank Officer Access"
-            />
+            <div style={styles.featureBox}>
+              <Feature
+                icon={
+                  <Briefcase size={18} />
+                }
+                text="Bank Officer Access"
+              />
 
-            <Feature
-              icon={
-                <FileCheck
-                  size={18}
-                />
-              }
-              text="Loan Application Review"
-            />
+              <Feature
+                icon={
+                  <FileCheck size={18} />
+                }
+                text="Loan Application Review"
+              />
 
-            <Feature
-              icon={
-                <Users
-                  size={18}
-                />
-              }
-              text="Risk Analysis"
-            />
+              <Feature
+                icon={
+                  <Users size={18} />
+                }
+                text="Risk Analysis"
+              />
 
-            <Feature
-              icon={
-                <Landmark
-                  size={18}
-                />
-              }
-              text="Branch Operations Panel"
-            />
+              <Feature
+                icon={
+                  <Landmark size={18} />
+                }
+                text="Branch Operations Panel"
+              />
 
-            <Feature
-              icon={
-                <ClipboardCheck
-                  size={18}
-                />
-              }
-              text="Approval Workflow System"
-            />
+              <Feature
+                icon={
+                  <ClipboardCheck
+                    size={18}
+                  />
+                }
+                text="Approval Workflow System"
+              />
+            </div>
+
+            <div style={styles.footer}>
+              © 2026 Secure Banking
+              Portal
+            </div>
           </div>
         </div>
-
-        {/* BOTTOM CARD */}
-
-      </div>
+      )}
 
       {/* RIGHT */}
       <div style={styles.right}>
         <div style={styles.card}>
-    
           <h2 style={styles.loginTitle}>
             Welcome Back
           </h2>
 
           <p style={styles.loginSub}>
-            Access your banking dashboard
+            Access your banking
+            dashboard
           </p>
 
           {errorMsg && (
-            <div
-              style={
-                styles.error
-              }
-            >
+            <div style={styles.error}>
               {errorMsg}
             </div>
           )}
@@ -205,6 +238,7 @@ function Login() {
               handleSubmit
             }
           >
+            {/* EMAIL */}
             <div
               style={
                 styles.inputBox
@@ -231,6 +265,7 @@ function Login() {
               />
             </div>
 
+            {/* PASSWORD */}
             <div
               style={
                 styles.inputBox
@@ -260,9 +295,7 @@ function Login() {
                 }
               />
 
-              <Eye
-                size={18}
-                color="#64748b"
+              <div
                 style={{
                   cursor:
                     "pointer"
@@ -272,27 +305,97 @@ function Login() {
                     !showPassword
                   )
                 }
-              />
+              >
+                {showPassword ? (
+                  <EyeOff
+                    size={18}
+                    color="#64748b"
+                  />
+                ) : (
+                  <Eye
+                    size={18}
+                    color="#64748b"
+                  />
+                )}
+              </div>
             </div>
 
+            {/* OPTIONS */}
+            <div
+              style={
+                styles.optionsRow
+              }
+            >
+              <label
+                style={
+                  styles.checkboxRow
+                }
+              >
+                <input
+                  type="checkbox"
+                  checked={
+                    remember
+                  }
+                  onChange={() =>
+                    setRemember(
+                      !remember
+                    )
+                  }
+                />
+                Remember me
+              </label>
+
+              <span
+                style={
+                  styles.forgot
+                }
+              >
+                Forgot Password?
+              </span>
+            </div>
+
+            {/* LOGIN */}
             <button
               type="submit"
               style={
                 styles.loginBtn
               }
             >
-              {loading
-                ? "Signing In..."
-                : "Login"}
+              {loading ? (
+                <span
+                  style={{
+                    display:
+                      "flex",
+                    alignItems:
+                      "center",
+                    gap: "10px",
+                    justifyContent:
+                      "center"
+                  }}
+                >
+                  <Loader2
+                    size={18}
+                    className="spin"
+                  />
+                  Signing In...
+                </span>
+              ) : (
+                "Login"
+              )}
             </button>
 
+            {/* GOOGLE */}
             <button
-            type="button"
-            style={styles.googleBtn}
-            onClick={handleGoogleLogin}
->
-            <FcGoogle size={22} />
-            Continue with Google
+              type="button"
+              style={
+                styles.googleBtn
+              }
+              onClick={
+                handleGoogleLogin
+              }
+            >
+              <FcGoogle size={22} />
+              Continue with Google
             </button>
           </form>
         </div>
@@ -317,47 +420,42 @@ const styles = {
   page: {
     minHeight: "100vh",
     display: "grid",
-    gridTemplateColumns:
-      "1fr 1fr",
     background:
       "linear-gradient(135deg,#0f172a,#1e3a8a)"
   },
 
-  
-left: {
-  padding: "60px",
-  color: "white",
-  display: "flex",
-  flexDirection: "column",
-  justifyContent: "center"
-},
+  left: {
+    padding: "60px",
+    color: "white",
+    display: "flex",
+    alignItems: "center"
+  },
+
   logo: {
-    width: "70px",
-    height: "70px",
-    borderRadius:
-      "18px",
+    width: "72px",
+    height: "72px",
+    borderRadius: "20px",
     background:
       "rgba(255,255,255,0.15)",
     display: "flex",
-    alignItems:
-      "center",
     justifyContent:
       "center",
-    marginBottom:
-      "25px"
+    alignItems: "center",
+    marginBottom: "24px"
   },
 
   brandTitle: {
-  fontSize: "42px",
-  fontWeight: "800",
-  lineHeight: "1.15"
+    fontSize: "44px",
+    fontWeight: "800",
+    lineHeight: "1.15"
   },
 
   brandSub: {
     marginTop: "15px",
     color:
-      "rgba(255,255,255,0.75)",
-    fontSize: "18px"
+      "rgba(255,255,255,0.78)",
+    fontSize: "18px",
+    lineHeight: "1.6"
   },
 
   featureBox: {
@@ -368,39 +466,40 @@ left: {
 
   feature: {
     display: "flex",
+    alignItems: "center",
     gap: "12px",
-    alignItems:
-      "center",
+    padding: "15px",
+    borderRadius: "14px",
     background:
       "rgba(255,255,255,0.08)",
-    padding: "14px",
-    borderRadius:
-      "14px",
-    fontWeight: "500"
+    fontWeight: "500",
+    transition: "0.3s"
   },
 
+  footer: {
+    marginTop: "30px",
+    color:
+      "rgba(255,255,255,0.6)",
+    fontSize: "14px"
+  },
 
   right: {
     display: "flex",
     justifyContent:
       "center",
-    alignItems:
-      "center",
-    padding: "40px"
+    alignItems: "center",
+    padding: "30px"
   },
 
   card: {
     width: "100%",
     maxWidth: "460px",
     background:
-      "rgba(255,255,255,0.96)",
-    borderRadius:
-      "24px",
+      "rgba(255,255,255,0.97)",
+    borderRadius: "24px",
     padding: "38px",
-    backdropFilter: "blur(12px)",
-    border: "1px solid rgba(255,255,255,0.3)",
     boxShadow:
-      "0 20px 50px rgba(0,0,0,0.25)"
+      "0 25px 60px rgba(0,0,0,0.25)"
   },
 
   loginTitle: {
@@ -411,80 +510,91 @@ left: {
   loginSub: {
     color: "#64748b",
     marginTop: "8px",
-    marginBottom:
-      "24px"
+    marginBottom: "24px"
   },
 
   error: {
-    background:
-      "#fee2e2",
-    color:
-      "#b91c1c",
+    background: "#fee2e2",
+    color: "#b91c1c",
     padding: "12px",
-    borderRadius:
-      "12px",
-    marginBottom:
-      "15px"
+    borderRadius: "12px",
+    marginBottom: "14px"
   },
 
   inputBox: {
     display: "flex",
-    alignItems:
-      "center",
+    alignItems: "center",
     gap: "10px",
     border:
       "1px solid #dbe2ea",
     padding: "15px",
-    borderRadius:
-      "14px",
-    marginBottom:
-      "16px"
+    borderRadius: "14px",
+    marginBottom: "16px",
+    transition: "0.3s"
   },
 
   input: {
     border: "none",
     outline: "none",
     width: "100%",
+    fontSize: "15px",
     background:
-      "transparent",
-    fontSize: "15px"
+      "transparent"
+  },
+
+  optionsRow: {
+    display: "flex",
+    justifyContent:
+      "space-between",
+    alignItems: "center",
+    marginBottom: "18px",
+    fontSize: "14px"
+  },
+
+  checkboxRow: {
+    display: "flex",
+    gap: "8px",
+    alignItems: "center",
+    color: "#475569"
+  },
+
+  forgot: {
+    color: "#2563eb",
+    cursor: "pointer",
+    fontWeight: "600"
   },
 
   loginBtn: {
     width: "100%",
     padding: "15px",
     border: "none",
-    transition: "0.3s ease",
-    borderRadius:
-      "14px",
+    borderRadius: "14px",
     background:
       "linear-gradient(90deg,#2563eb,#1d4ed8)",
     color: "white",
     fontWeight: "700",
     fontSize: "16px",
     cursor: "pointer",
-    marginTop: "6px"
+    transition: "0.3s"
   },
 
   googleBtn: {
     width: "100%",
     padding: "15px",
     borderRadius: "14px",
-    border: "1px solid #dbe2ea",
+    border:
+      "1px solid #dbe2ea",
     background: "white",
     fontWeight: "700",
     cursor: "pointer",
     marginTop: "12px",
     display: "flex",
+    justifyContent:
+      "center",
     alignItems: "center",
-    justifyContent: "center",
     gap: "12px",
-    fontSize: "16px",
-    color: "#111827",
-    transition: "0.3s"
+    fontSize: "16px"
   }
-
-  };
+};
 
 export default Login;
-
