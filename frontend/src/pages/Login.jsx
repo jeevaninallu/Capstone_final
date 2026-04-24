@@ -33,20 +33,32 @@ function Login() {
     password: ""
   });
 
-  const [errorMsg, setErrorMsg] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [remember, setRemember] = useState(false);
-  const [isMobile, setIsMobile] = useState(
-    window.innerWidth < 900
-  );
+  const [errorMsg, setErrorMsg] =
+    useState("");
+
+  const [showPassword,
+    setShowPassword] =
+    useState(false);
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [isMobile,
+    setIsMobile] = useState(
+      window.innerWidth < 900
+    );
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 900);
+      setIsMobile(
+        window.innerWidth < 900
+      );
     };
 
-    window.addEventListener("resize", handleResize);
+    window.addEventListener(
+      "resize",
+      handleResize
+    );
 
     return () =>
       window.removeEventListener(
@@ -68,7 +80,10 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!form.email || !form.password) {
+    if (
+      !form.email ||
+      !form.password
+    ) {
       setErrorMsg(
         "Please fill all fields"
       );
@@ -85,14 +100,6 @@ function Login() {
 
       if (res.data.success) {
         login(res.data.user);
-
-        if (remember) {
-          localStorage.setItem(
-            "savedEmail",
-            form.email
-          );
-        }
-
         navigate("/dashboard");
       }
     } catch (error) {
@@ -145,14 +152,14 @@ function Login() {
             : "1fr 1fr"
       }}
     >
-      {/* LEFT */}
+      {/* LEFT SIDE */}
       {!isMobile && (
         <div style={styles.left}>
           <div>
             <div style={styles.logo}>
               <ShieldCheck
-                color="white"
                 size={30}
+                color="white"
               />
             </div>
 
@@ -168,31 +175,43 @@ function Login() {
               and officer workflow.
             </p>
 
-            <div style={styles.featureBox}>
+            <div
+              style={
+                styles.featureBox
+              }
+            >
               <Feature
                 icon={
-                  <Briefcase size={18} />
+                  <Briefcase
+                    size={18}
+                  />
                 }
                 text="Bank Officer Access"
               />
 
               <Feature
                 icon={
-                  <FileCheck size={18} />
+                  <FileCheck
+                    size={18}
+                  />
                 }
                 text="Loan Application Review"
               />
 
               <Feature
                 icon={
-                  <Users size={18} />
+                  <Users
+                    size={18}
+                  />
                 }
                 text="Risk Analysis"
               />
 
               <Feature
                 icon={
-                  <Landmark size={18} />
+                  <Landmark
+                    size={18}
+                  />
                 }
                 text="Branch Operations Panel"
               />
@@ -207,15 +226,15 @@ function Login() {
               />
             </div>
 
-            <div style={styles.footer}>
+            <p style={styles.footer}>
               © 2026 Secure Banking
               Portal
-            </div>
+            </p>
           </div>
         </div>
       )}
 
-      {/* RIGHT */}
+      {/* RIGHT SIDE */}
       <div style={styles.right}>
         <div style={styles.card}>
           <h2 style={styles.loginTitle}>
@@ -228,7 +247,11 @@ function Login() {
           </p>
 
           {errorMsg && (
-            <div style={styles.error}>
+            <div
+              style={
+                styles.error
+              }
+            >
               {errorMsg}
             </div>
           )}
@@ -296,15 +319,15 @@ function Login() {
               />
 
               <div
-                style={{
-                  cursor:
-                    "pointer"
-                }}
                 onClick={() =>
                   setShowPassword(
                     !showPassword
                   )
                 }
+                style={{
+                  cursor:
+                    "pointer"
+                }}
               >
                 {showPassword ? (
                   <EyeOff
@@ -320,39 +343,14 @@ function Login() {
               </div>
             </div>
 
-            {/* OPTIONS */}
-            <div
+            <p
               style={
-                styles.optionsRow
+                styles.securityText
               }
             >
-              <label
-                style={
-                  styles.checkboxRow
-                }
-              >
-                <input
-                  type="checkbox"
-                  checked={
-                    remember
-                  }
-                  onChange={() =>
-                    setRemember(
-                      !remember
-                    )
-                  }
-                />
-                Remember me
-              </label>
-
-              <span
-                style={
-                  styles.forgot
-                }
-              >
-                Forgot Password?
-              </span>
-            </div>
+              Secure employee access
+              portal
+            </p>
 
             {/* LOGIN */}
             <button
@@ -366,16 +364,15 @@ function Login() {
                   style={{
                     display:
                       "flex",
+                    justifyContent:
+                      "center",
                     alignItems:
                       "center",
-                    gap: "10px",
-                    justifyContent:
-                      "center"
+                    gap: "10px"
                   }}
                 >
                   <Loader2
                     size={18}
-                    className="spin"
                   />
                   Signing In...
                 </span>
@@ -394,7 +391,9 @@ function Login() {
                 handleGoogleLogin
               }
             >
-              <FcGoogle size={22} />
+              <FcGoogle
+                size={22}
+              />
               Continue with Google
             </button>
           </form>
@@ -434,14 +433,17 @@ const styles = {
   logo: {
     width: "72px",
     height: "72px",
-    borderRadius: "20px",
+    borderRadius:
+      "20px",
     background:
       "rgba(255,255,255,0.15)",
     display: "flex",
     justifyContent:
       "center",
-    alignItems: "center",
-    marginBottom: "24px"
+    alignItems:
+      "center",
+    marginBottom:
+      "24px"
   },
 
   brandTitle: {
@@ -452,10 +454,10 @@ const styles = {
 
   brandSub: {
     marginTop: "15px",
-    color:
-      "rgba(255,255,255,0.78)",
     fontSize: "18px",
-    lineHeight: "1.6"
+    lineHeight: "1.6",
+    color:
+      "rgba(255,255,255,0.78)"
   },
 
   featureBox: {
@@ -466,28 +468,32 @@ const styles = {
 
   feature: {
     display: "flex",
-    alignItems: "center",
+    alignItems:
+      "center",
     gap: "12px",
     padding: "15px",
-    borderRadius: "14px",
+    borderRadius:
+      "14px",
     background:
       "rgba(255,255,255,0.08)",
     fontWeight: "500",
-    transition: "0.3s"
+    transition:
+      "all 0.3s ease"
   },
 
   footer: {
-    marginTop: "30px",
+    marginTop: "28px",
+    fontSize: "14px",
     color:
-      "rgba(255,255,255,0.6)",
-    fontSize: "14px"
+      "rgba(255,255,255,0.6)"
   },
 
   right: {
     display: "flex",
     justifyContent:
       "center",
-    alignItems: "center",
+    alignItems:
+      "center",
     padding: "30px"
   },
 
@@ -495,8 +501,9 @@ const styles = {
     width: "100%",
     maxWidth: "460px",
     background:
-      "rgba(255,255,255,0.97)",
-    borderRadius: "24px",
+      "linear-gradient(180deg,#ffffff,#f8fafc)",
+    borderRadius:
+      "24px",
     padding: "38px",
     boxShadow:
       "0 25px 60px rgba(0,0,0,0.25)"
@@ -510,27 +517,36 @@ const styles = {
   loginSub: {
     color: "#64748b",
     marginTop: "8px",
-    marginBottom: "24px"
+    marginBottom:
+      "24px"
   },
 
   error: {
-    background: "#fee2e2",
-    color: "#b91c1c",
+    background:
+      "#fee2e2",
+    color:
+      "#b91c1c",
     padding: "12px",
-    borderRadius: "12px",
-    marginBottom: "14px"
+    borderRadius:
+      "12px",
+    marginBottom:
+      "14px"
   },
 
   inputBox: {
     display: "flex",
-    alignItems: "center",
+    alignItems:
+      "center",
     gap: "10px",
     border:
       "1px solid #dbe2ea",
     padding: "15px",
-    borderRadius: "14px",
-    marginBottom: "16px",
-    transition: "0.3s"
+    borderRadius:
+      "14px",
+    marginBottom:
+      "16px",
+    transition:
+      "all 0.3s ease"
   },
 
   input: {
@@ -542,58 +558,50 @@ const styles = {
       "transparent"
   },
 
-  optionsRow: {
-    display: "flex",
-    justifyContent:
-      "space-between",
-    alignItems: "center",
-    marginBottom: "18px",
-    fontSize: "14px"
-  },
-
-  checkboxRow: {
-    display: "flex",
-    gap: "8px",
-    alignItems: "center",
-    color: "#475569"
-  },
-
-  forgot: {
-    color: "#2563eb",
-    cursor: "pointer",
-    fontWeight: "600"
+  securityText: {
+    fontSize: "13px",
+    color: "#64748b",
+    marginBottom:
+      "18px"
   },
 
   loginBtn: {
     width: "100%",
     padding: "15px",
     border: "none",
-    borderRadius: "14px",
+    borderRadius:
+      "14px",
     background:
       "linear-gradient(90deg,#2563eb,#1d4ed8)",
     color: "white",
     fontWeight: "700",
     fontSize: "16px",
     cursor: "pointer",
-    transition: "0.3s"
+    transition:
+      "all 0.3s ease"
   },
 
   googleBtn: {
     width: "100%",
     padding: "15px",
-    borderRadius: "14px",
+    marginTop: "12px",
+    borderRadius:
+      "14px",
     border:
       "1px solid #dbe2ea",
-    background: "white",
+    background:
+      "white",
     fontWeight: "700",
     cursor: "pointer",
-    marginTop: "12px",
     display: "flex",
     justifyContent:
       "center",
-    alignItems: "center",
+    alignItems:
+      "center",
     gap: "12px",
-    fontSize: "16px"
+    fontSize: "16px",
+    transition:
+      "all 0.3s ease"
   }
 };
 
