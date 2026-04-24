@@ -181,18 +181,12 @@ function Login() {
       {/* RIGHT */}
       <div style={styles.right}>
         <div style={styles.card}>
-          <h2
-            style={
-              styles.loginTitle
-            }
-          >
+    
+          <h2 style={styles.loginTitle}>
+            Welcome Back
           </h2>
 
-          <p
-            style={
-              styles.loginSub
-            }
-          >
+          <p style={styles.loginSub}>
             Access your banking dashboard
           </p>
 
