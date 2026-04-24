@@ -32,6 +32,24 @@ function RiskAssessment() {
     });
   };
 
+  const resetForm = () => {
+    setFormData({
+      no_of_dependents: "",
+      education: "0",
+      self_employed: "0",
+      income_annum: "",
+      loan_amount: "",
+      loan_term: "",
+      cibil_score: "",
+      residential_assets_value: "",
+      commercial_assets_value: "",
+      luxury_assets_value: "",
+      bank_asset_value: ""
+    });
+
+    setResult(null);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -48,8 +66,12 @@ function RiskAssessment() {
 
       setResult({
         status: data.prediction,
-        probability: data.probability
+        probability: data.probability,
+        confidence: data.confidence_score,
+        riskLevel: data.risk_level,
+        applicationId: data.applicationId
       });
+
     } catch (error) {
       alert("Prediction API Error");
     } finally {
@@ -162,9 +184,24 @@ function RiskAssessment() {
               />
             </div>
 
-            <button type="submit" style={styles.button}>
-              {loading ? "Predicting..." : "Predict Risk"}
-            </button>
+            <div style={styles.btnWrap}>
+              <button
+                type="submit"
+                style={styles.button}
+              >
+                {loading
+                  ? "Predicting..."
+                  : "Predict Risk"}
+              </button>
+
+              <button
+                type="button"
+                style={styles.resetBtn}
+                onClick={resetForm}
+              >
+                Reset Form
+              </button>
+            </div>
           </form>
 
           {/* RESULT */}
@@ -173,6 +210,10 @@ function RiskAssessment() {
               <h2 style={styles.resultHeading}>
                 Prediction Result
               </h2>
+
+              <p style={styles.appId}>
+                Application ID: {result.applicationId}
+              </p>
 
               <div style={styles.resultGrid}>
                 <ResultCard
@@ -194,18 +235,21 @@ function RiskAssessment() {
                 />
 
                 <ResultCard
+                  title="Confidence Score"
+                  value={`${(
+                    result.confidence * 100
+                  ).toFixed(2)}%`}
+                  color="#7c3aed"
+                />
+
+                <ResultCard
                   title="Risk Level"
-                  value={
-                    result.probability < 0.35
-                      ? "Low"
-                      : result.probability < 0.65
-                      ? "Medium"
-                      : "High"
-                  }
+                  value={result.riskLevel}
                   color={
-                    result.probability < 0.35
+                    result.riskLevel === "Low"
                       ? "#16a34a"
-                      : result.probability < 0.65
+                      : result.riskLevel ===
+                        "Medium"
                       ? "#f59e0b"
                       : "#ef4444"
                   }
@@ -219,6 +263,7 @@ function RiskAssessment() {
   );
 }
 
+/* INPUT */
 function Input({
   label,
   name,
@@ -243,6 +288,7 @@ function Input({
   );
 }
 
+/* SELECT */
 function Select({
   label,
   name,
@@ -275,6 +321,7 @@ function Select({
   );
 }
 
+/* RESULT CARD */
 function ResultCard({
   title,
   value,
@@ -312,19 +359,18 @@ const styles = {
   heading: {
     fontSize: "42px",
     fontWeight: "800",
-    color: "white",
-    marginBottom: "8px"
+    color: "white"
   },
 
   sub: {
-    color: "rgba(255,255,255,0.9)",
+    color: "rgba(255,255,255,0.85)",
     marginBottom: "28px",
     fontSize: "18px"
   },
 
   card: {
     background:
-      "rgba(255,255,255,0.95)",
+      "rgba(255,255,255,0.96)",
     padding: "30px",
     borderRadius: "24px",
     boxShadow:
@@ -355,9 +401,14 @@ const styles = {
     outline: "none"
   },
 
+  btnWrap: {
+    display: "flex",
+    gap: "14px",
+    marginTop: "28px"
+  },
+
   button: {
-    marginTop: "28px",
-    width: "100%",
+    flex: 1,
     padding: "15px",
     background:
       "linear-gradient(90deg,#2563eb,#1d4ed8)",
@@ -366,6 +417,17 @@ const styles = {
     borderRadius: "14px",
     fontWeight: "700",
     fontSize: "16px",
+    cursor: "pointer"
+  },
+
+  resetBtn: {
+    flex: 1,
+    padding: "15px",
+    background: "#e2e8f0",
+    color: "#0f172a",
+    border: "none",
+    borderRadius: "14px",
+    fontWeight: "700",
     cursor: "pointer"
   },
 
@@ -380,10 +442,16 @@ const styles = {
   },
 
   resultHeading: {
-    marginBottom: "20px",
     fontSize: "28px",
     fontWeight: "800",
     color: "#111827"
+  },
+
+  appId: {
+    marginTop: "8px",
+    marginBottom: "18px",
+    color: "#64748b",
+    fontWeight: "600"
   },
 
   resultGrid: {
