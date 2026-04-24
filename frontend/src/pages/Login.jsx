@@ -186,7 +186,6 @@ function Login() {
               styles.loginTitle
             }
           >
-            Welcome Back 
           </h2>
 
           <p
