@@ -29,12 +29,9 @@ function Navbar() {
       {/* LEFT */}
       <div>
         <h2 style={styles.title}>
-          Dashboard
+          Welcome Back
         </h2>
 
-        <p style={styles.subTitle}>
-          Welcome back
-        </p>
       </div>
 
       {/* RIGHT */}
