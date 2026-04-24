@@ -1,15 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import {
-  Search,
-  Bell,
-  LogOut
-} from "lucide-react";
+import { LogOut } from "lucide-react";
 
 function Navbar() {
   const navigate = useNavigate();
 
-  const { logout, user } =
+  const { logout } =
     useAuth();
 
   const handleLogout = () => {
@@ -37,24 +33,8 @@ function Navbar() {
         </h2>
 
         <p style={styles.subTitle}>
-          Welcome back,{" "}
-          {user?.name ||
-            "Officer"}
+          Welcome back
         </p>
-      </div>
-
-      {/* CENTER */}
-      <div style={styles.searchBox}>
-        <Search
-          size={18}
-          color="#94a3b8"
-        />
-
-        <input
-          type="text"
-          placeholder="Search..."
-          style={styles.input}
-        />
       </div>
 
       {/* RIGHT */}
@@ -62,12 +42,6 @@ function Navbar() {
         <p style={styles.date}>
           {today}
         </p>
-
-        <div
-          style={styles.iconBox}
-        >
-          <Bell size={18} />
-        </div>
 
         <button
           style={styles.btn}
@@ -115,32 +89,6 @@ const styles = {
     fontSize: "14px"
   },
 
-  searchBox: {
-    flex: 1,
-    maxWidth: "420px",
-    minWidth: "240px",
-    background:
-      "rgba(255,255,255,0.12)",
-    border:
-      "1px solid rgba(255,255,255,0.18)",
-    borderRadius: "12px",
-    padding: "10px 14px",
-    display: "flex",
-    alignItems:
-      "center",
-    gap: "10px"
-  },
-
-  input: {
-    width: "100%",
-    border: "none",
-    outline: "none",
-    background:
-      "transparent",
-    color: "white",
-    fontSize: "14px"
-  },
-
   right: {
     display: "flex",
     alignItems:
@@ -154,21 +102,6 @@ const styles = {
       "rgba(255,255,255,0.75)",
     fontSize: "14px",
     fontWeight: "500"
-  },
-
-  iconBox: {
-    width: "38px",
-    height: "38px",
-    borderRadius: "10px",
-    background:
-      "rgba(255,255,255,0.12)",
-    color: "white",
-    display: "flex",
-    justifyContent:
-      "center",
-    alignItems:
-      "center",
-    cursor: "pointer"
   },
 
   btn: {
