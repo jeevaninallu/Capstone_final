@@ -246,7 +246,7 @@ function Login() {
 
           <p style={styles.loginSub}>
             Access your banking
-            dashboard ...
+            dashboard
           </p>
 
           {errorMsg && (
