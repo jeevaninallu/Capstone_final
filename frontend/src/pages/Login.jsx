@@ -183,7 +183,7 @@ function Login() {
         <div style={styles.card}>
     
           <h2 style={styles.loginTitle}>
-            Welcome Back
+            Hi, Welcome Back
           </h2>
 
           <p style={styles.loginSub}>
