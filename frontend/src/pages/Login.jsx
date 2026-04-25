@@ -168,8 +168,7 @@ function Login() {
             </h1>
 
             <p style={styles.brandSub}>
-              AI-powered internal
-              banking platform for
+              Banking platform for
               secure approvals,
               default risk review,
               and officer workflow.
