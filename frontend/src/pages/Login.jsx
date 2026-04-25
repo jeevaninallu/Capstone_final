@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../services/api";
 import { useAuth } from "../context/AuthContext";
@@ -8,20 +8,20 @@ import {
   signInWithPopup
 } from "firebase/auth";
 
-// ✅ ONLY CHANGE THESE IMPORTS AT TOP
-
 import { FcGoogle } from "react-icons/fc";
 
 import {
   Mail,
   Lock,
   Eye,
+  EyeOff,
   ShieldCheck,
   Briefcase,
   FileCheck,
   Users,
   Landmark,
-  ClipboardCheck
+  ClipboardCheck,
+  Loader2
 } from "lucide-react";
 
 function Login() {
@@ -33,11 +33,39 @@ function Login() {
     password: ""
   });
 
-  const [errorMsg, setErrorMsg] = useState("");
-  const [showPassword, setShowPassword] =
+  const [errorMsg, setErrorMsg] =
+    useState("");
+
+  const [showPassword,
+    setShowPassword] =
     useState(false);
+
   const [loading, setLoading] =
     useState(false);
+
+  const [isMobile,
+    setIsMobile] = useState(
+      window.innerWidth < 900
+    );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(
+        window.innerWidth < 900
+      );
+    };
+
+    window.addEventListener(
+      "resize",
+      handleResize
+    );
+
+    return () =>
+      window.removeEventListener(
+        "resize",
+        handleResize
+      );
+  }, []);
 
   const handleChange = (e) => {
     setForm({
@@ -51,6 +79,17 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (
+      !form.email ||
+      !form.password
+    ) {
+      setErrorMsg(
+        "Please fill all fields"
+      );
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -104,90 +143,106 @@ function Login() {
     };
 
   return (
-    <div style={styles.page}>
-      {/* LEFT */}
-      <div style={styles.left}>
-        <div>
-          <div style={styles.logo}>
-            <ShieldCheck
-              color="white"
-              size={28}
-            />
-          </div>
+    <div
+      style={{
+        ...styles.page,
+        gridTemplateColumns:
+          isMobile
+            ? "1fr"
+            : "1fr 1fr"
+      }}
+    >
+      {/* LEFT SIDE */}
+      {!isMobile && (
+        <div style={styles.left}>
+          <div>
+            <div style={styles.logo}>
+              <ShieldCheck
+                size={30}
+                color="white"
+              />
+            </div>
 
-          <h1 style={styles.brandTitle}>
-            Loan Default Prediction
-          </h1>
+            <h1 style={styles.brandTitle}>
+              Loan Default Prediction
+            </h1>
 
-          <p style={styles.brandSub}>
-            Smart internal banking
-            system for secure loan
-            approvals and risk review.
-          </p>
+            <p style={styles.brandSub}>
+              Banking platform for
+              secure approvals,
+              default risk review,
+              and officer workflow.
+            </p>
 
-          {/* NEW 5 BOXES */}
-          <div style={styles.featureBox}>
-            <Feature
-              icon={
-                <Briefcase
-                  size={18}
-                />
+            <div
+              style={
+                styles.featureBox
               }
-              text="Bank Officer Access"
-            />
+            >
+              <Feature
+                icon={
+                  <Briefcase
+                    size={18}
+                  />
+                }
+                text="Bank Officer Access"
+              />
 
-            <Feature
-              icon={
-                <FileCheck
-                  size={18}
-                />
-              }
-              text="Loan Application Review"
-            />
+              <Feature
+                icon={
+                  <FileCheck
+                    size={18}
+                  />
+                }
+                text="Loan Application Review"
+              />
 
-            <Feature
-              icon={
-                <Users
-                  size={18}
-                />
-              }
-              text="Risk Analysis"
-            />
+              <Feature
+                icon={
+                  <Users
+                    size={18}
+                  />
+                }
+                text="Risk Analysis"
+              />
 
-            <Feature
-              icon={
-                <Landmark
-                  size={18}
-                />
-              }
-              text="Branch Operations Panel"
-            />
+              <Feature
+                icon={
+                  <Landmark
+                    size={18}
+                  />
+                }
+                text="Branch Operations Panel"
+              />
 
-            <Feature
-              icon={
-                <ClipboardCheck
-                  size={18}
-                />
-              }
-              text="Approval Workflow System"
-            />
+              <Feature
+                icon={
+                  <ClipboardCheck
+                    size={18}
+                  />
+                }
+                text="Approval Workflow System"
+              />
+            </div>
+
+            <p style={styles.footer}>
+              © 2026 Secure Banking
+              Portal
+            </p>
           </div>
         </div>
+      )}
 
-        {/* BOTTOM CARD */}
-
-      </div>
-
-      {/* RIGHT */}
+      {/* RIGHT SIDE */}
       <div style={styles.right}>
         <div style={styles.card}>
-    
           <h2 style={styles.loginTitle}>
             Hi, Welcome Back
           </h2>
 
           <p style={styles.loginSub}>
-            Access your banking dashboard
+            Access your banking
+            dashboard
           </p>
 
           {errorMsg && (
@@ -205,6 +260,7 @@ function Login() {
               handleSubmit
             }
           >
+            {/* EMAIL */}
             <div
               style={
                 styles.inputBox
@@ -231,6 +287,7 @@ function Login() {
               />
             </div>
 
+            {/* PASSWORD */}
             <div
               style={
                 styles.inputBox
@@ -260,39 +317,83 @@ function Login() {
                 }
               />
 
-              <Eye
-                size={18}
-                color="#64748b"
-                style={{
-                  cursor:
-                    "pointer"
-                }}
+              <div
                 onClick={() =>
                   setShowPassword(
                     !showPassword
                   )
                 }
-              />
+                style={{
+                  cursor:
+                    "pointer"
+                }}
+              >
+                {showPassword ? (
+                  <EyeOff
+                    size={18}
+                    color="#64748b"
+                  />
+                ) : (
+                  <Eye
+                    size={18}
+                    color="#64748b"
+                  />
+                )}
+              </div>
             </div>
 
+            <p
+              style={
+                styles.securityText
+              }
+            >
+              Secure employee access
+              portal
+            </p>
+
+            {/* LOGIN */}
             <button
               type="submit"
               style={
                 styles.loginBtn
               }
             >
-              {loading
-                ? "Signing In..."
-                : "Login"}
+              {loading ? (
+                <span
+                  style={{
+                    display:
+                      "flex",
+                    justifyContent:
+                      "center",
+                    alignItems:
+                      "center",
+                    gap: "10px"
+                  }}
+                >
+                  <Loader2
+                    size={18}
+                  />
+                  Signing In...
+                </span>
+              ) : (
+                "Login"
+              )}
             </button>
 
+            {/* GOOGLE */}
             <button
-            type="button"
-            style={styles.googleBtn}
-            onClick={handleGoogleLogin}
->
-            <FcGoogle size={22} />
-            Continue with Google
+              type="button"
+              style={
+                styles.googleBtn
+              }
+              onClick={
+                handleGoogleLogin
+              }
+            >
+              <FcGoogle
+                size={22}
+              />
+              Continue with Google
             </button>
           </form>
         </div>
@@ -317,47 +418,45 @@ const styles = {
   page: {
     minHeight: "100vh",
     display: "grid",
-    gridTemplateColumns:
-      "1fr 1fr",
     background:
       "linear-gradient(135deg,#0f172a,#1e3a8a)"
   },
 
-  
-left: {
-  padding: "60px",
-  color: "white",
-  display: "flex",
-  flexDirection: "column",
-  justifyContent: "center"
-},
+  left: {
+    padding: "60px",
+    color: "white",
+    display: "flex",
+    alignItems: "center"
+  },
+
   logo: {
-    width: "70px",
-    height: "70px",
+    width: "72px",
+    height: "72px",
     borderRadius:
-      "18px",
+      "20px",
     background:
       "rgba(255,255,255,0.15)",
     display: "flex",
-    alignItems:
-      "center",
     justifyContent:
       "center",
+    alignItems:
+      "center",
     marginBottom:
-      "25px"
+      "24px"
   },
 
   brandTitle: {
-  fontSize: "42px",
-  fontWeight: "800",
-  lineHeight: "1.15"
+    fontSize: "44px",
+    fontWeight: "800",
+    lineHeight: "1.15"
   },
 
   brandSub: {
     marginTop: "15px",
+    fontSize: "18px",
+    lineHeight: "1.6",
     color:
-      "rgba(255,255,255,0.75)",
-    fontSize: "18px"
+      "rgba(255,255,255,0.78)"
   },
 
   featureBox: {
@@ -368,17 +467,25 @@ left: {
 
   feature: {
     display: "flex",
-    gap: "12px",
     alignItems:
       "center",
-    background:
-      "rgba(255,255,255,0.08)",
-    padding: "14px",
+    gap: "12px",
+    padding: "15px",
     borderRadius:
       "14px",
-    fontWeight: "500"
+    background:
+      "rgba(255,255,255,0.08)",
+    fontWeight: "500",
+    transition:
+      "all 0.3s ease"
   },
 
+  footer: {
+    marginTop: "28px",
+    fontSize: "14px",
+    color:
+      "rgba(255,255,255,0.6)"
+  },
 
   right: {
     display: "flex",
@@ -386,21 +493,19 @@ left: {
       "center",
     alignItems:
       "center",
-    padding: "40px"
+    padding: "30px"
   },
 
   card: {
     width: "100%",
     maxWidth: "460px",
     background:
-      "rgba(255,255,255,0.96)",
+      "linear-gradient(180deg,#ffffff,#f8fafc)",
     borderRadius:
       "24px",
     padding: "38px",
-    backdropFilter: "blur(12px)",
-    border: "1px solid rgba(255,255,255,0.3)",
     boxShadow:
-      "0 20px 50px rgba(0,0,0,0.25)"
+      "0 25px 60px rgba(0,0,0,0.25)"
   },
 
   loginTitle: {
@@ -424,7 +529,7 @@ left: {
     borderRadius:
       "12px",
     marginBottom:
-      "15px"
+      "14px"
   },
 
   inputBox: {
@@ -438,23 +543,31 @@ left: {
     borderRadius:
       "14px",
     marginBottom:
-      "16px"
+      "16px",
+    transition:
+      "all 0.3s ease"
   },
 
   input: {
     border: "none",
     outline: "none",
     width: "100%",
+    fontSize: "15px",
     background:
-      "transparent",
-    fontSize: "15px"
+      "transparent"
+  },
+
+  securityText: {
+    fontSize: "13px",
+    color: "#64748b",
+    marginBottom:
+      "18px"
   },
 
   loginBtn: {
     width: "100%",
     padding: "15px",
     border: "none",
-    transition: "0.3s ease",
     borderRadius:
       "14px",
     background:
@@ -463,28 +576,32 @@ left: {
     fontWeight: "700",
     fontSize: "16px",
     cursor: "pointer",
-    marginTop: "6px"
+    transition:
+      "all 0.3s ease"
   },
 
   googleBtn: {
     width: "100%",
     padding: "15px",
-    borderRadius: "14px",
-    border: "1px solid #dbe2ea",
-    background: "white",
+    marginTop: "12px",
+    borderRadius:
+      "14px",
+    border:
+      "1px solid #dbe2ea",
+    background:
+      "white",
     fontWeight: "700",
     cursor: "pointer",
-    marginTop: "12px",
     display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+    justifyContent:
+      "center",
+    alignItems:
+      "center",
     gap: "12px",
     fontSize: "16px",
-    color: "#111827",
-    transition: "0.3s"
+    transition:
+      "all 0.3s ease"
   }
-
-  };
+};
 
 export default Login;
-
